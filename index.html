@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Trouvez votre table</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest: #1F3A2E;
+    --forest-deep: #14261D;
+    --ivory: #FAF6EE;
+    --gold: #B8935A;
+    --gold-light: #D9BC8C;
+    --charcoal: #2B2620;
+    --line: rgba(184,147,90,0.35);
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin:0; padding:0; height:100%;
+    background: radial-gradient(120% 120% at 50% 0%, var(--forest) 0%, var(--forest-deep) 70%);
+    font-family: 'Jost', sans-serif;
+    color: var(--charcoal);
+  }
+
+  body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 24px;
+    overflow-x:hidden;
+  }
+
+  .bg-monogram{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+    opacity:0.05;
+    font-family:'Cormorant Garamond', serif;
+    font-size: min(60vw, 520px);
+    color: var(--gold-light);
+    font-style: italic;
+    user-select:none;
+  }
+
+  .card{
+    position:relative;
+    width:100%;
+    max-width: 460px;
+    background: var(--ivory);
+    border-radius: 4px;
+    padding: 56px 40px 44px;
+    text-align:center;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+    border: 1px solid var(--line);
+  }
+
+  .card::before, .card::after{
+    content:"";
+    position:absolute;
+    width:36px; height:36px;
+    border: 1px solid var(--gold);
+    opacity:0.6;
+  }
+  .card::before{ top:10px; left:10px; border-right:none; border-bottom:none; }
+  .card::after{ bottom:10px; right:10px; border-left:none; border-top:none; }
+
+  .eyebrow{
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+
+  h1{
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 34px;
+    line-height: 1.15;
+    margin: 0 0 8px;
+    color: var(--forest);
+  }
+
+  .subtitle{
+    font-size: 14.5px;
+    color: #6b6357;
+    margin: 0 0 32px;
+    font-weight: 300;
+  }
+
+  .search-row{
+    display:flex;
+    gap:0;
+    border-bottom: 1.5px solid var(--charcoal);
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+    transition: border-color .25s ease;
+  }
+  .search-row:focus-within{ border-color: var(--gold); }
+
+  #nameInput{
+    flex:1;
+    border:none;
+    outline:none;
+    background:transparent;
+    font-family:'Jost', sans-serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--charcoal);
+    padding: 8px 4px;
+    letter-spacing: 0.2px;
+  }
+  #nameInput::placeholder{ color:#a39a89; font-weight:300; }
+
+  #searchBtn{
+    border:none;
+    background:none;
+    cursor:pointer;
+    color: var(--gold);
+    font-family:'Jost', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform:uppercase;
+    padding: 8px 6px;
+    transition: color .2s ease, transform .2s ease;
+  }
+  #searchBtn:hover{ color: var(--forest); transform: translateX(2px); }
+
+  .hint{
+    font-size:12px;
+    color:#a39a89;
+    margin-top: 14px;
+    min-height: 16px;
+  }
+
+  /* --- Result / seal --- */
+  .result{
+    margin-top: 30px;
+    display:none;
+  }
+  .result.show{ display:block; animation: rise .5s ease; }
+
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(10px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .seal{
+    width: 96px; height:96px;
+    border-radius:50%;
+    margin: 0 auto 18px;
+    background: radial-gradient(circle at 35% 30%, var(--gold-light), var(--gold) 55%, #8f6d3f 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 8px 22px rgba(184,147,90,0.45), inset 0 0 0 3px rgba(255,255,255,0.15);
+    transform: scale(0.4) rotate(-20deg);
+    animation: seal-pop .55s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+
+  @keyframes seal-pop{
+    to{ transform: scale(1) rotate(0deg); }
+  }
+
+  .seal-num{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:600;
+    font-size: 34px;
+    color: var(--forest-deep);
+    line-height:1;
+  }
+
+  .welcome{
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #8a8172;
+    margin-bottom: 6px;
+  }
+
+  .guest-name{
+    font-family:'Cormorant Garamond', serif;
+    font-size: 26px;
+    color: var(--forest);
+    margin: 0 0 10px;
+  }
+
+  .table-line{
+    font-size: 15px;
+    color: var(--charcoal);
+    font-weight: 400;
+  }
+  .table-line strong{
+    color: var(--gold);
+    font-weight:600;
+  }
+
+  .checkin-confirmed{
+    display:none;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--line);
+    font-size: 14px;
+    color: #2e6b45;
+    font-weight: 500;
+  }
+  .checkin-confirmed.show{ display:block; animation: rise .35s ease; }
+  .checkin-confirmed .time{ color: var(--forest); font-weight:600; }
+
+  .checkin-warning{
+    display:none;
+    margin-top: 18px;
+    padding: 14px 16px;
+    background: rgba(196,120,50,0.10);
+    border: 1px solid rgba(196,120,50,0.4);
+    font-size: 13.5px;
+    color: #8a4f1f;
+    text-align:left;
+    line-height:1.5;
+  }
+  .checkin-warning.show{ display:block; animation: rise .35s ease; }
+  .checkin-warning strong{ display:block; margin-bottom:2px; }
+
+  .checkin-pending{
+    display:none;
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: #a39a89;
+    font-style: italic;
+  }
+  .checkin-pending.show{ display:block; }
+
+  .checkin-error{
+    display:none;
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: rgba(180,60,60,0.08);
+    border: 1px solid rgba(180,60,60,0.3);
+    font-size: 12.5px;
+    color: #9a3d3d;
+    text-align:left;
+    line-height:1.5;
+  }
+  .checkin-error.show{ display:block; }
+
+  .not-found{
+    margin-top: 26px;
+    padding: 16px 18px;
+    border: 1px solid var(--line);
+    background: rgba(184,147,90,0.08);
+    font-size: 14px;
+    color: #6b6357;
+    display:none;
+    line-height:1.5;
+  }
+  .not-found.show{ display:block; animation: rise .4s ease; }
+
+  .suggestions{
+    margin-top:10px;
+  }
+  .suggestions button{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:none;
+    border:none;
+    border-top: 1px solid var(--line);
+    padding: 8px 2px;
+    font-family:'Jost', sans-serif;
+    font-size: 14px;
+    color: var(--forest);
+    cursor:pointer;
+  }
+  .suggestions button:hover{ color: var(--gold); }
+
+  footer{
+    margin-top: 34px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #8a8172;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .seal, .result.show, .not-found.show { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-monogram">&amp;</div>
+
+<div class="card">
+  <div class="eyebrow">Bienvenue</div>
+  <h1>Trouvez votre table</h1>
+  <p class="subtitle">Saisissez votre nom complet ci-dessous</p>
+
+  <div class="search-row">
+    <input type="text" id="nameInput" placeholder="Ex. David Balemba" autocomplete="off" autofocus>
+    <button id="searchBtn" type="button">Rechercher</button>
+  </div>
+  <div class="hint">Appuyez sur Entrée ou cliquez sur Rechercher</div>
+
+  <div class="result" id="result">
+    <div class="seal" id="seal"><div class="seal-num" id="sealNum">–</div></div>
+    <div class="welcome">Bienvenue</div>
+    <p class="guest-name" id="guestName"></p>
+    <p class="table-line">Vous êtes à la <strong id="tableLabel"></strong></p>
+
+    <div class="checkin-warning" id="checkinWarning">
+      <strong>⚠️ Vous êtes déjà enregistré(e)</strong>
+      <span>Heure d'entrée : <span id="alreadyTime"></span></span>
+    </div>
+
+    <div class="checkin-confirmed" id="checkinConfirmed">
+      ✅ Enregistré(e) à <span class="time" id="confirmedTime"></span>
+    </div>
+
+    <div class="checkin-pending" id="checkinPending">Enregistrement en cours…</div>
+    <div class="checkin-error" id="checkinError">Connexion impossible — votre table est correcte, mais l'enregistrement n'a pas pu être transmis. Réessayez.</div>
+  </div>
+
+  <div class="not-found" id="notFound">
+    <div id="notFoundMsg">Nous n'avons pas trouvé ce nom. Vérifiez l'orthographe ou demandez de l'aide à un membre de la famille.</div>
+    <div class="suggestions" id="suggestions"></div>
+  </div>
+
+  <footer>Mariage civil de Christian et Daniela</footer>
+</div>
+
+<script>
+// === Liste des invités ===
+// Généré à partir du fichier invites.xlsx.
+// Pour mettre à jour : renvoyer le fichier Excel complété, la liste ci-dessous sera régénérée.
+const GUESTS = [{"name": "Dorcas Balemba", "table": 1}, {"name": "Fernando Balemba", "table": 1}, {"name": "Guillaume Bisimwa", "table": 1}, {"name": "Irene Bisimwa", "table": 1}, {"name": "Michael Bisimwa", "table": 1}, {"name": "Sephora Bisimwa", "table": 1}, {"name": "Francis Civava", "table": 1}, {"name": "Edith Civava", "table": 1}, {"name": "Deo Kahindo", "table": 1}, {"name": "Louis Kanku", "table": 1}, {"name": "Christelle Lulengo", "table": 1}, {"name": "Polycarpe Makinga", "table": 1}, {"name": "Placide Mubalama", "table": 1}, {"name": "Madame Mubalama", "table": 1}, {"name": "Lydie Mukengule", "table": 1}, {"name": "Maryssa Mukengule", "table": 1}, {"name": "Bony Mushagalusa", "table": 1}, {"name": "Francine Mushagalusa", "table": 1}, {"name": "Leslie Mushagalusa", "table": 1}, {"name": "Katy Mushagalusa", "table": 1}, {"name": "Karel Mushagalusa", "table": 1}, {"name": "Mario Tshipata", "table": 1}, {"name": "Madame Tshipata", "table": 1}, {"name": "Miché Bashizi", "table": 2}, {"name": "Delphine Bashizi", "table": 2}, {"name": "Innocent Binwa", "table": 2}, {"name": "Olivier Buhendwa", "table": 2}, {"name": "Francine Minang", "table": 2}, {"name": "Winnie Abdala", "table": 2}, {"name": "Malaika Bwino", "table": 2}, {"name": "Aline Kahindo", "table": 2}, {"name": "Yves Adidiema", "table": 2}, {"name": "Pamela Mufungizi", "table": 2}, {"name": "Anange Muissa", "table": 2}, {"name": "Jessica Abdala", "table": 2}, {"name": "Francis Mwanza", "table": 2}, {"name": "Romita Abdala", "table": 2}, {"name": "Arlette Aluma", "table": 3}, {"name": "Collins Anoban", "table": 3}, {"name": "David Aluma", "table": 3}, {"name": "Rusha Beya", "table": 3}, {"name": "Maman Gaby", "table": 3}, {"name": "Serge Aluma", "table": 3}, {"name": "Jeanne Cabuine", "table": 3}, {"name": "Anne Fumbele", "table": 3}, {"name": "Nathanaël Fumbele", "table": 3}, {"name": "Christian Mavungu", "table": 3}, {"name": "Geormil Mavungu", "table": 3}, {"name": "Christevie Musole", "table": 3}, {"name": "Beni Ntabaza", "table": 3}, {"name": "Joseph Glody", "table": 3}, {"name": "Thierry Atah", "table": 4}, {"name": "Reda Fakhri", "table": 4}, {"name": "Bertini Ilunga", "table": 4}, {"name": "Christine Ilunga", "table": 4}, {"name": "Eric Kulondwa", "table": 4}, {"name": "Chawki Labou", "table": 4}, {"name": "Oumayma Dahhane", "table": 4}, {"name": "Homer Muanamuya", "table": 4}, {"name": "Jean-Baptiste Muntu", "table": 4}, {"name": "Jeanne laure Ndjomo", "table": 4}, {"name": "Josiah Ubong", "table": 4}, {"name": "Jean-Marc Tshitala", "table": 4}, {"name": "Cornelie Wasenda", "table": 4}, {"name": "Ruben Yaba", "table": 4}, {"name": "Espoir Asende", "table": 5}, {"name": "Rebecca Shweka", "table": 5}, {"name": "Diana Kouadio", "table": 5}, {"name": "Souleymane Guiro", "table": 5}, {"name": "Petit Paul Ilunga", "table": 5}, {"name": "Esther Kasthialuki", "table": 5}, {"name": "Beni Kalubi", "table": 5}, {"name": "Gad kawela", "table": 5}, {"name": "Grâce Kimina", "table": 5}, {"name": "Axel Kimina", "table": 5}, {"name": "Serena Kimina", "table": 5}, {"name": "Antoinette Lubumba", "table": 5}, {"name": "Kyria Mboyo", "table": 5}, {"name": "Charmaine Zoure", "table": 5}, {"name": "Zoe", "table": 6}, {"name": "Malkiya", "table": 6}, {"name": "Josepha", "table": 6}, {"name": "Johan", "table": 6}, {"name": "Joel", "table": 6}, {"name": "Johekim", "table": 6}, {"name": "Lamine", "table": 6}, {"name": "Jessiana", "table": 6}, {"name": "Jasmine", "table": 6}, {"name": "Janitha", "table": 6}, {"name": "Arzur", "table": 6}, {"name": "Taliane", "table": 6}, {"name": "Tacis", "table": 6}, {"name": "Amani & Imani", "table": 6}, {"name": "Dia Musole", "table": 7}, {"name": "Yvonne Lubumba", "table": 7}, {"name": "Gauthier Balemba", "table": 7}, {"name": "Daniel Balemba", "table": 7}, {"name": "David Balemba", "table": 7}, {"name": "David Mushagalusa", "table": 7}, {"name": "Ghislain Ntombi", "table": 7}, {"name": "Israel Muhigirwa", "table": 7}, {"name": "Samy Musole", "table": 7}, {"name": "Glody", "table": 7}, {"name": "Sissy", "table": 7}, {"name": "Josue Mukengule", "table": 7}];
+
+function normalize(str){
+  return str
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // retire les accents
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+const input = document.getElementById('nameInput');
+const btn = document.getElementById('searchBtn');
+const resultEl = document.getElementById('result');
+const notFoundEl = document.getElementById('notFound');
+const seal = document.getElementById('seal');
+const sealNum = document.getElementById('sealNum');
+const guestName = document.getElementById('guestName');
+const tableLabel = document.getElementById('tableLabel');
+const suggestions = document.getElementById('suggestions');
+const checkinConfirmed = document.getElementById('checkinConfirmed');
+const confirmedTime = document.getElementById('confirmedTime');
+const checkinWarning = document.getElementById('checkinWarning');
+const alreadyTime = document.getElementById('alreadyTime');
+const checkinPending = document.getElementById('checkinPending');
+const checkinError = document.getElementById('checkinError');
+
+// === Registre des présences (partagé, en ligne) ===
+// L'adresse ci-dessous doit pointer vers le service qui enregistre les heures
+// d'arrivée pour TOUS les invités, peu importe le téléphone utilisé.
+// Tant que cette adresse n'est pas configurée, le site utilise un registre
+// local temporaire (uniquement pour tester sur CET appareil) — à remplacer
+// avant le jour du mariage.
+const CHECKIN_ENDPOINT = "https://script.google.com/macros/s/AKfycbyCGYFj0aPZQSW7r3HBFizSAtPMbHSPoPfn8Xpn2B9J5Kk5iiuUx8hdlON09bK_I4xHsg/exec";
+
+function guestKey(guest){
+  return normalize(guest.name) + '__table' + guest.table;
+}
+
+function formatTime(date){
+  return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
+
+// Registre local de secours (utilisé seulement si CHECKIN_ENDPOINT est vide,
+// donc seulement pendant les tests, pas le jour J)
+function localFallbackCheckin(key){
+  const store = JSON.parse(localStorage.getItem('mariage_checkins_test') || '{}');
+  if (store[key]) return { status: 'already', time: store[key] };
+  const time = formatTime(new Date());
+  store[key] = time;
+  localStorage.setItem('mariage_checkins_test', JSON.stringify(store));
+  return { status: 'recorded', time };
+}
+
+async function registerArrival(guest){
+  const key = guestKey(guest);
+
+  if (!CHECKIN_ENDPOINT){
+    return localFallbackCheckin(key);
+  }
+
+  const response = await fetch(CHECKIN_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // évite un pré-vol CORS
+    body: JSON.stringify({ key, name: guest.name, table: guest.table })
+  });
+  if (!response.ok) throw new Error('network');
+  return response.json(); // { status: 'recorded' | 'already', time: '15:42' }
+}
+
+function reset(){
+  resultEl.classList.remove('show');
+  notFoundEl.classList.remove('show');
+  checkinWarning.classList.remove('show');
+  checkinConfirmed.classList.remove('show');
+  checkinPending.classList.remove('show');
+  checkinError.classList.remove('show');
+  suggestions.innerHTML = '';
+  // relancer l'animation du sceau au prochain succès
+  seal.style.animation = 'none';
+  void seal.offsetWidth;
+  seal.style.animation = null;
+}
+
+async function showResult(guest){
+  reset();
+  guestName.textContent = guest.name;
+  tableLabel.innerHTML = 'Table ' + guest.table;
+  sealNum.textContent = guest.table;
+  resultEl.classList.add('show');
+
+  checkinPending.classList.add('show');
+  try{
+    const res = await registerArrival(guest);
+    checkinPending.classList.remove('show');
+    if (res.status === 'already'){
+      alreadyTime.textContent = res.time;
+      checkinWarning.classList.add('show');
+    } else {
+      confirmedTime.textContent = res.time;
+      checkinConfirmed.classList.add('show');
+    }
+  } catch(err){
+    checkinPending.classList.remove('show');
+    checkinError.classList.add('show');
+  }
+}
+
+function showNotFound(query){
+  reset();
+  const nq = normalize(query);
+  const close = GUESTS
+    .filter(g => normalize(g.name).includes(nq.split(' ')[0]) || nq.split(' ').some(part => part.length > 1 && normalize(g.name).includes(part)))
+    .slice(0, 4);
+
+  suggestions.innerHTML = '';
+  if (close.length){
+    const label = document.createElement('div');
+    label.style.fontSize = '12px';
+    label.style.color = '#a39a89';
+    label.style.marginTop = '4px';
+    label.textContent = 'Vouliez-vous dire :';
+    suggestions.appendChild(label);
+    close.forEach(g => {
+      const b = document.createElement('button');
+      b.textContent = g.name;
+      b.onclick = () => { input.value = g.name; search(); };
+      suggestions.appendChild(b);
+    });
+  }
+  notFoundEl.classList.add('show');
+}
+
+function search(){
+  const query = input.value.trim();
+  if (!query) return;
+  const nq = normalize(query);
+
+  // 1. correspondance exacte
+  let match = GUESTS.find(g => normalize(g.name) === nq);
+
+  // 2. correspondance "contient" (au cas où l'invité tape juste le prénom ou le nom)
+  if (!match){
+    const candidates = GUESTS.filter(g => normalize(g.name).includes(nq) || nq.includes(normalize(g.name)));
+    if (candidates.length === 1) match = candidates[0];
+  }
+
+  if (match){
+    showResult(match);
+  } else {
+    showNotFound(query);
+  }
+}
+
+btn.addEventListener('click', search);
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') search();
+});
+</script>
+
+</body>
+</html>
