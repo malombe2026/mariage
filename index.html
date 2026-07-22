@@ -406,9 +406,10 @@ async function registerArrival(guest){
   const url = CHECKIN_ENDPOINT
     + '?key=' + encodeURIComponent(key)
     + '&name=' + encodeURIComponent(guest.name)
-    + '&table=' + encodeURIComponent(guest.table);
+    + '&table=' + encodeURIComponent(guest.table)
+    + '&_=' + Date.now(); // évite que le navigateur réutilise une ancienne réponse mise en cache
 
-  const response = await fetch(url); // GET simple : pas de pré-vol CORS, pas de risque de redirection POST->GET
+  const response = await fetch(url, { cache: 'no-store' }); // GET simple : pas de pré-vol CORS, pas de risque de redirection POST->GET
   if (!response.ok) throw new Error('network');
   return response.json(); // { status: 'recorded' | 'already', time: '15:42' }
 }
